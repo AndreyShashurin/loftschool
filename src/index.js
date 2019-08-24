@@ -102,9 +102,7 @@ function returnArgumentsArray() {
    console.log(newSum()) выведет 6
  */
 function bindFunction(fn) {
-    let argArray = [2, 4];
-
-    let newArray = argArray.slice.call(arguments, 1);
+    let newArray = [].slice.call(arguments, 1);
     
     return function F() {
         return fn.apply(null, newArray);
