@@ -11,6 +11,11 @@
    createDivWithText('loftschool') // создаст элемент div, поместит в него 'loftschool' и вернет созданный элемент
  */
 function createDivWithText(text) {
+    const createDiv = document.createElement('div');
+
+    createDiv.innerHTML = text;
+
+    return createDiv;
 }
 
 /*
@@ -22,6 +27,7 @@ function createDivWithText(text) {
    prepend(document.querySelector('#one'), document.querySelector('#two')) // добавит элемент переданный первым аргументом в начало элемента переданного вторым аргументом
  */
 function prepend(what, where) {
+    where.prepend(what);
 }
 
 /*
@@ -44,6 +50,16 @@ function prepend(what, where) {
    findAllPSiblings(document.body) // функция должна вернуть массив с элементами div и span т.к. следующим соседом этих элементов является элемент с тегом P
  */
 function findAllPSiblings(where) {
+    let result = [], 
+        whereArray = where.children;
+
+    for (let i = 0; i < whereArray.length - 1; i++) {
+        if (whereArray[i].nextElementSibling.nodeName == 'P') {
+            result.push(whereArray[i]);
+        } 
+    }
+
+    return result;
 }
 
 /*
@@ -64,12 +80,12 @@ function findAllPSiblings(where) {
    findError(document.body) // функция должна вернуть массив с элементами 'привет' и 'loftschool'
  */
 function findError(where) {
-    var result = [];
+    let result = [];
 
-    for (var child of where.childNodes) {
+    for (let child of where.children) {
         result.push(child.innerText);
     }
-
+    
     return result;
 }
 
@@ -86,6 +102,11 @@ function findError(where) {
    должно быть преобразовано в <div></div><p></p>
  */
 function deleteTextNodes(where) {
+    for (let child of where.childNodes) {
+        if (child.nodeType === 3) {
+            child.parentNode.removeChild(child);
+        }
+    }
 }
 
 /*
@@ -100,6 +121,16 @@ function deleteTextNodes(where) {
    должно быть преобразовано в <span><div><b></b></div><p></p></span>
  */
 function deleteTextNodesRecursive(where) {
+    let child = where.childNodes;
+
+    for (let i = 0; i < child.length; i++) {
+        if (child[i].nodeType === 3) {
+            where.removeChild(child[i]);
+            i--;
+        } else if (child[i].nodeType === 1) {
+            deleteTextNodesRecursive(child[i]);
+        }
+    }
 }
 
 /*
@@ -123,6 +154,39 @@ function deleteTextNodesRecursive(where) {
    }
  */
 function collectDOMStat(root) {
+    let result = {
+        tags: {},
+        classes: {},
+        texts: 0
+    };
+
+    function domStat(root) {
+        for (let child of root.childNodes ) {
+            if (child.nodeType === 1) {
+                if (child.tagName in result.tags) {
+                    result.tags[child.tagName]++;
+                } else {
+                    result.tags[child.tagName] = 1;
+                }
+                for (let className of child.classList) {
+                    if (className in result.classes) {
+                        result.classes[className]++;
+                    } else {
+                        result.classes[className] = 1;
+                    }
+                }
+            } else if (child.nodeType === 3) {
+                ++result.texts;
+            }
+
+            if (child.childNodes.length) {
+                domStat(child);
+            }
+        }
+    }
+    domStat(root);
+    
+    return result;
 }
 
 /*
