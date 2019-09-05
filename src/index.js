@@ -1,107 +1,90 @@
-/* ДЗ 2 - работа с массивами и объектами */
+/* ДЗ 5 - DOM Events */
 
 /*
  Задание 1:
 
- Напишите аналог встроенного метода forEach для работы с массивами
- Посмотрите как работает forEach и повторите это поведение для массива, который будет передан в параметре array
- */
-function forEach(array, fn) {
-    for (let i = 0; i < array.length; i++) {
-        let index = array[i];
+ Функция должна добавлять обработчик fn события eventName к элементу target
 
-        fn(index, i, array);
-    }
+ Пример:
+   addListener('click', document.querySelector('a'), () => console.log('...')) // должна добавить указанный обработчик кликов на указанный элемент
+ */
+function addListener(eventName, target, fn) {
+    target.addEventListener(eventName, fn);
 }
 
 /*
  Задание 2:
 
- Напишите аналог встроенного метода map для работы с массивами
- Посмотрите как работает map и повторите это поведение для массива, который будет передан в параметре array
+ Функция должна удалять у элемента target обработчик fn события eventName
+
+ Пример:
+   removeListener('click', document.querySelector('a'), someHandler) // должна удалить указанный обработчик кликов на указанный элемент
  */
-function map(array, fn) {
-    let newArray = [];
-
-    for (let i = 0; i < array.length; i++) {
-        let index = array[i];
-
-        newArray.push( fn(index, i, array) );
-    }
-
-    return newArray;
+function removeListener(eventName, target, fn) {
+    target.removeEventListener(eventName, fn);
 }
 
 /*
  Задание 3:
 
- Напишите аналог встроенного метода reduce для работы с массивами
- Посмотрите как работает reduce и повторите это поведение для массива, который будет передан в параметре array
+ Функция должна добавить к элементу target такой обработчик на события eventName, чтобы он отменял действия по умолчанию
+
+ Пример:
+   skipDefault('click', document.querySelector('a')) // после вызова функции, клики на указанную ссылку не должны приводить к переходу на другую страницу
  */
-function reduce(array, fn, initial) {
-    let prevValue = initial || array[0],
-        index = initial ? 0 : 1; 
-
-    for ( ; index < array.length; index++) {
-        prevValue = fn(prevValue, array[index], index, array);
-    }
-
-    return prevValue;
+function skipDefault(eventName, target) {
+    target.addEventListener(eventName, function(event) {
+        event.preventDefault();
+    });
 }
 
 /*
  Задание 4:
 
- Функция должна перебрать все свойства объекта, преобразовать их имена в верхний регистр и вернуть в виде массива
+ Функция должна эмулировать событие click для элемента target
 
  Пример:
-   upperProps({ name: 'Сергей', lastName: 'Петров' }) вернет ['NAME', 'LASTNAME']
+   emulateClick(document.querySelector('a')) // для указанного элемента должно быть сэмулировано события click
  */
-function upperProps(obj) {
-    let newObj = [];
-
-    for (let key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            newObj.push(key.toUpperCase());
-        }
-    }
-
-    return newObj;
+function emulateClick(target) {
+    target.click();
 }
 
 /*
- Задание 5 *:
+ Задание 5:
 
- Напишите аналог встроенного метода slice для работы с массивами
- Посмотрите как работает slice и повторите это поведение для массива, который будет передан в параметре array
+ Функция должна добавить такой обработчик кликов к элементу target,
+ который реагирует (вызывает fn) только на клики по элементам BUTTON внутри target
+
+ Пример:
+   delegate(document.body, () => console.log('кликнули на button')) // добавит такой обработчик кликов для body, который будет вызывать указанную функцию только если кликнули на кнопку (элемент с тегом button)
  */
-function slice(array, from, to) {
-    
-}
-
-/*
- Задание 6 *:
-
- Функция принимает объект и должна вернуть Proxy для этого объекта
- Proxy должен перехватывать все попытки записи значений свойств и возводить это значение в квадрат
- */
-function createProxy(obj) {
-    let proxy = new Proxy(obj, {
-        set: function (target, name, value) {
-            target[name] = Math.pow(value, 2);
-
-            return target[name];
+function delegate(target, fn) {
+    target.addEventListener('click', (event) => {
+        if (event.target.tagName == 'BUTTON') {
+            fn();
         }
     });
-     
-    return proxy;
+}
+
+/*
+ Задание 6:
+
+ Функция должна добавить такой обработчик кликов к элементу target,
+ который сработает только один раз и удалится (перестанет срабатывать для последующих кликов по указанному элементу)
+
+ Пример:
+   once(document.querySelector('button'), () => console.log('обработчик выполнился!')) // добавит такой обработчик кликов для указанного элемента, который вызовется только один раз и затем удалится
+ */
+function once(target, fn) {
+    target.addEventListener('click', fn, { once: true });
 }
 
 export {
-    forEach,
-    map,
-    reduce,
-    upperProps,
-    slice,
-    createProxy
+    addListener,
+    removeListener,
+    skipDefault,
+    emulateClick,
+    delegate,
+    once
 };
