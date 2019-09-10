@@ -1,259 +1,59 @@
-/* ДЗ 4 - работа с DOM */
+/* ДЗ 6 - Асинхронность и работа с сетью */
 
 /*
  Задание 1:
 
- 1.1: Функция должна создать элемент с тегом DIV
-
- 1.2: В созданный элемент необходимо поместить текст, переданный в параметр text
+ Функция должна возвращать Promise, который должен быть разрешен через указанное количество секунду
 
  Пример:
-   createDivWithText('loftschool') // создаст элемент div, поместит в него 'loftschool' и вернет созданный элемент
+   delayPromise(3) // вернет promise, который будет разрешен через 3 секунды
  */
-function createDivWithText(text) {
-    const createDiv = document.createElement('div');
+function delayPromise(seconds) {
+    seconds = 1000;
 
-    createDiv.innerText = text;
-
-    return createDiv;
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, seconds);
+    });
 }
 
 /*
  Задание 2:
 
- Функция должна вставлять элемент, переданный в параметре what в начало элемента, переданного в параметре where
+ 2.1: Функция должна вернуть Promise, который должен быть разрешен с массивом городов в качестве значения
+
+ Массив городов можно получить отправив асинхронный запрос по адресу
+ https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
+
+ 2.2: Элементы полученного массива должны быть отсортированы по имени города
 
  Пример:
-   prepend(document.querySelector('#one'), document.querySelector('#two')) // добавит элемент переданный первым аргументом в начало элемента переданного вторым аргументом
+   loadAndSortTowns().then(towns => console.log(towns)) // должна вывести в консоль отсортированный массив городов
  */
-function prepend(what, where) {
-    where.prepend(what);
-}
+function loadAndSortTowns() {
+    return new Promise((resolve) => {
+        let xhr = new XMLHttpRequest();
+        
+        xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json', true);
+        xhr.responseType = 'json';
+        xhr.onload = () => {
+            let result = xhr.response;
 
-/*
- Задание 3:
-
- 3.1: Функция должна перебрать все дочерние элементы узла, переданного в параметре where
-
- 3.2: Функция должна вернуть массив, состоящий из тех дочерних элементов, следующим соседом которых является элемент с тегом P
-
- Пример:
-   Представим, что есть разметка:
-   <body>
-      <div></div>
-      <p></p>
-      <a></a>
-      <span></span>
-      <p></p>
-   </dody>
-
-   findAllPSiblings(document.body) // функция должна вернуть массив с элементами div и span т.к. следующим соседом этих элементов является элемент с тегом P
- */
-function findAllPSiblings(where) {
-    let result = [], 
-        whereArray = where.children;
-
-    for (let i = 0; i < whereArray.length - 1; i++) {
-        if (whereArray[i].nextElementSibling.nodeName == 'P') {
-            result.push(whereArray[i]);
-        } 
-    }
-
-    return result;
-}
-
-/*
- Задание 4:
-
- Функция представленная ниже, перебирает все дочерние узлы типа "элемент" внутри узла переданного в параметре where и возвращает массив из текстового содержимого найденных элементов.
- Но похоже, что в код функции закралась ошибка и она работает не так, как описано.
-
- Необходимо найти и исправить ошибку в коде так, чтобы функция работала так, как описано выше.
-
- Пример:
-   Представим, что есть разметка:
-   <body>
-      <div>привет</div>
-      <div>loftschool</div>
-   </dody>
-
-   findError(document.body) // функция должна вернуть массив с элементами 'привет' и 'loftschool'
- */
-function findError(where) {
-    let result = [];
-
-    for (let child of where.children) {
-        result.push(child.innerText);
-    }
-    
-    return result;
-}
-
-/*
- Задание 5:
-
- Функция должна перебрать все дочерние узлы элемента переданного в параметре where и удалить из него все текстовые узлы
-
- Задачу необходимо решить без использования рекурсии, то есть можно не уходить вглубь дерева.
- Так же будьте внимательны при удалении узлов, т.к. можно получить неожиданное поведение при переборе узлов
-
- Пример:
-   После выполнения функции, дерево <div></div>привет<p></p>loftchool!!!
-   должно быть преобразовано в <div></div><p></p>
- */
-function deleteTextNodes(where) {
-    for (let child of where.childNodes) {
-        if (child.nodeType === 3) {
-            child.parentNode.removeChild(child);
+            result.sort((a, b) => {
+                if (a.name > b.name) {
+                    return 1;
+                } 
+                
+                return -1;
+            });
+            resolve(result);
         }
-    }
-}
-
-/*
- Задание 6:
-
- Выполнить предудыщее задание с использование рекурсии - то есть необходимо заходить внутрь каждого дочернего элемента (углубляться в дерево)
-
- Так же будьте внимательны при удалении узлов, т.к. можно получить неожиданное поведение при переборе узлов
-
- Пример:
-   После выполнения функции, дерево <span> <div> <b>привет</b> </div> <p>loftchool</p> !!!</span>
-   должно быть преобразовано в <span><div><b></b></div><p></p></span>
- */
-function deleteTextNodesRecursive(where) {
-    let child = where.childNodes;
-
-    for (let i = 0; i < child.length; i++) {
-        if (child[i].nodeType === 3) {
-            where.removeChild(child[i]);
-            i--;
-        } else if (child[i].nodeType === 1) {
-            deleteTextNodesRecursive(child[i]);
-        }
-    }
-}
-
-/*
- Задание 7 *:
-
- Необходимо собрать статистику по всем узлам внутри элемента переданного в параметре root и вернуть ее в виде объекта
- Статистика должна содержать:
- - количество текстовых узлов
- - количество элементов каждого класса
- - количество элементов каждого тега
- Для работы с классами рекомендуется использовать classList
- Постарайтесь не создавать глобальных переменных
-
- Пример:
-   Для дерева <div class="some-class-1"><b>привет!</b> <b class="some-class-1 some-class-2">loftschool</b></div>
-   должен быть возвращен такой объект:
-   {
-     tags: { DIV: 1, B: 2},
-     classes: { "some-class-1": 2, "some-class-2": 1 },
-     texts: 3
-   }
- */
-function collectDOMStat(root) {
-    let result = {
-        tags: {},
-        classes: {},
-        texts: 0
-    };
-
-    function domStat(root) {
-        for (let child of root.childNodes ) {
-            if (child.nodeType === 1) {
-                if (child.tagName in result.tags) {
-                    result.tags[child.tagName]++;
-                } else {
-                    result.tags[child.tagName] = 1;
-                }
-                for (let className of child.classList) {
-                    if (className in result.classes) {
-                        result.classes[className]++;
-                    } else {
-                        result.classes[className] = 1;
-                    }
-                }
-            } else if (child.nodeType === 3) {
-                ++result.texts;
-            }
-
-            if (child.childNodes.length) {
-                domStat(child);
-            }
-        }
-    }
-    domStat(root);
-    
-    return result;
-}
-
-/*
- Задание 8 *:
-
- 8.1: Функция должна отслеживать добавление и удаление элементов внутри элемента переданного в параметре where
- Как только в where добавляются или удаляются элементы,
- необходимо сообщать об этом при помощи вызова функции переданной в параметре fn
-
- 8.2: При вызове fn необходимо передавать ей в качестве аргумента объект с двумя свойствами:
-   - type: типа события (insert или remove)
-   - nodes: массив из удаленных или добавленных элементов (в зависимости от события)
-
- 8.3: Отслеживание должно работать вне зависимости от глубины создаваемых/удаляемых элементов
-
- Рекомендуется использовать MutationObserver
-
- Пример:
-   Если в where или в одного из его детей добавляется элемент div
-   то fn должна быть вызвана с аргументом:
-   {
-     type: 'insert',
-     nodes: [div]
-   }
-
-   ------
-
-   Если из where или из одного из его детей удаляется элемент div
-   то fn должна быть вызвана с аргументом:
-   {
-     type: 'remove',
-     nodes: [div]
-   }
- */
-function observeChildNodes(where, fn) {
-    let result = {
-       type: ''
-    };
-    const mutationConfig = { 
-        childList: true,
-        subtree: true
-    };
-    let observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            result.nodes = [];
-            if (mutation.type == 'childList') {
-                if (mutation.addedNodes.length) {
-                    result.type = 'insert';
-                    result.nodes.push(...mutation.addedNodes);		
-                } else if (mutation.removedNodes.length) {
-                    result.type = 'remove';
-                    result.nodes.push(...mutation.removedNodes);
-                }
-            }
-        });
-        fn(result);
-    });
-    observer.observe(where, mutationConfig);
+        xhr.send();
+    })
 }
 
 export {
-    createDivWithText,
-    prepend,
-    findAllPSiblings,
-    findError,
-    deleteTextNodes,
-    deleteTextNodesRecursive,
-    collectDOMStat,
-    observeChildNodes
+    delayPromise,
+    loadAndSortTowns
 };
