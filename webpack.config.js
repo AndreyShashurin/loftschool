@@ -38,9 +38,9 @@ const html = files['.hbs']
 
 if (!html.length || !files['.hbs'].find(file => file.name === 'index')) {
     html.push(new HtmlPlugin({
-        title: 'towns',
-        template: 'towns.hbs',
-        chunks: ['towns']
+        title: 'cookie',
+        template: 'cookie.hbs',
+        chunks: ['cookie']
     }));
 }
 
