@@ -104,11 +104,17 @@ loadTowns()
                     filterResult.appendChild(div)
                 }
             }
+
+            if (!value) {
+                filterResult.innerHTML = '';
+            }
         });        
     },
     error => {
         let errorBlock = document.createElement('div'),
             button = document.createElement('button');
+            
+        loadingBlock.style.display = 'none';
 
         button.classList.add('btn');
         button.innerText = 'Повторить';
