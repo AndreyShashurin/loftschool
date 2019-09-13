@@ -1,107 +1,59 @@
-/* ДЗ 2 - работа с массивами и объектами */
+/* ДЗ 6 - Асинхронность и работа с сетью */
 
 /*
  Задание 1:
 
- Напишите аналог встроенного метода forEach для работы с массивами
- Посмотрите как работает forEach и повторите это поведение для массива, который будет передан в параметре array
- */
-function forEach(array, fn) {
-    for (let i = 0; i < array.length; i++) {
-        let index = array[i];
+ Функция должна возвращать Promise, который должен быть разрешен через указанное количество секунду
 
-        fn(index, i, array);
-    }
+ Пример:
+   delayPromise(3) // вернет promise, который будет разрешен через 3 секунды
+ */
+function delayPromise(seconds) {
+    seconds = 1000;
+
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, seconds);
+    });
 }
 
 /*
  Задание 2:
 
- Напишите аналог встроенного метода map для работы с массивами
- Посмотрите как работает map и повторите это поведение для массива, который будет передан в параметре array
- */
-function map(array, fn) {
-    let newArray = [];
+ 2.1: Функция должна вернуть Promise, который должен быть разрешен с массивом городов в качестве значения
 
-    for (let i = 0; i < array.length; i++) {
-        let index = array[i];
+ Массив городов можно получить отправив асинхронный запрос по адресу
+ https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
 
-        newArray.push( fn(index, i, array) );
-    }
-
-    return newArray;
-}
-
-/*
- Задание 3:
-
- Напишите аналог встроенного метода reduce для работы с массивами
- Посмотрите как работает reduce и повторите это поведение для массива, который будет передан в параметре array
- */
-function reduce(array, fn, initial) {
-    let prevValue = initial || array[0],
-        index = initial ? 0 : 1; 
-
-    for ( ; index < array.length; index++) {
-        prevValue = fn(prevValue, array[index], index, array);
-    }
-
-    return prevValue;
-}
-
-/*
- Задание 4:
-
- Функция должна перебрать все свойства объекта, преобразовать их имена в верхний регистр и вернуть в виде массива
+ 2.2: Элементы полученного массива должны быть отсортированы по имени города
 
  Пример:
-   upperProps({ name: 'Сергей', lastName: 'Петров' }) вернет ['NAME', 'LASTNAME']
+   loadAndSortTowns().then(towns => console.log(towns)) // должна вывести в консоль отсортированный массив городов
  */
-function upperProps(obj) {
-    let newObj = [];
+function loadAndSortTowns() {
+    return new Promise((resolve) => {
+        let xhr = new XMLHttpRequest();
+        
+        xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json', true);
+        xhr.responseType = 'json';
+        xhr.onload = () => {
+            let result = xhr.response;
 
-    for (let key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            newObj.push(key.toUpperCase());
+            result.sort((a, b) => {
+                if (a.name > b.name) {
+                    return 1;
+                } 
+                
+                return -1;
+            });
+            resolve(result);
         }
-    }
-
-    return newObj;
-}
-
-/*
- Задание 5 *:
-
- Напишите аналог встроенного метода slice для работы с массивами
- Посмотрите как работает slice и повторите это поведение для массива, который будет передан в параметре array
- */
-function slice(array, from, to) {
-    
-}
-
-/*
- Задание 6 *:
-
- Функция принимает объект и должна вернуть Proxy для этого объекта
- Proxy должен перехватывать все попытки записи значений свойств и возводить это значение в квадрат
- */
-function createProxy(obj) {
-    let proxy = new Proxy(obj, {
-        set: function (target, name, value) {
-            target[name] = Math.pow(value, 2);
-
-            return target[name];
-        }
-    });
-     
-    return proxy;
+        xhr.send();
+    })
 }
 
 export {
-    forEach,
-    map,
-    reduce,
-    upperProps,
-    slice,
-    createProxy
+    delayPromise,
+    loadAndSortTowns
 };
