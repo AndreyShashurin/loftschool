@@ -6,12 +6,28 @@ let arrayPlacemark = [],
     myGeocoder;
 const date = new Date();
 
+const formatDate = (date) => {
+
+    let dd = date.getDate();
+    let mm = date.getMonth() + 1;
+    let yyyy = date.getFullYear();
+
+    if (dd < 10) {
+        dd = '0' + dd;
+    }
+    if (mm < 10) {
+        mm = '0' + mm;
+    }
+
+    return `${dd}.${mm}.${yyyy}`;
+};
+
 // Загрузим тестовые данные в localStorage если их нет
-if(!localStorage.getItem('arrayPlacemarks')){
+if (!localStorage.getItem('arrayPlacemarks')) {
     localStorage.setItem('arrayPlacemarks', JSON.stringify(arrayPlacemark));
 }
 
-function init() {
+const init = () => {
     let myMap = new ymaps.Map("map", {
         center: [55.76, 37.64],
         zoom: 10,
@@ -24,7 +40,7 @@ function init() {
     arrayPlacemarksLocalStorage = JSON.parse(localStorage.getItem('arrayPlacemarks'))
 
     // Находим последний элемент
-    function lastId() {
+    const lastId = () => {
         let lastId = arrayPlacemarksLocalStorage.length > 0 ? arrayPlacemarksLocalStorage[arrayPlacemarksLocalStorage.length - 1].id : 0;  
         return lastId;
     }
@@ -185,7 +201,7 @@ function init() {
         }
     })
 
-    function updateStorage(option, searchForm, coords, header) {
+    const updateStorage = (option, searchForm, coords, header) => {
         arrayPlacemarksLocalStorage.push({
             header: header,
             name: searchForm.querySelector('#name-input').value,
@@ -194,25 +210,25 @@ function init() {
             lng: coords[1],     
             place: searchForm.querySelector('#place-input').value,
             comment: searchForm.querySelector('#comment-input').value,
-            date: `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`,
+            date: formatDate(date)
         });
 
         localStorage.setItem('arrayPlacemarks', JSON.stringify(arrayPlacemarksLocalStorage));
     }
 
     // Создание метки.
-    function createPlacemark(coords, header, index, searchForm) {
+    const createPlacemark = (coords, header, index, searchForm) => {
         const nameInput = searchForm.querySelector('#name-input'),
               placeInput = searchForm.querySelector('#place-input'),
               coomentInput = searchForm.querySelector('#comment-input');
 
         placemarks = new ymaps.Placemark(coords, {
+            id: index.id,
             balloonHeader: header,
             header: header,
             name: nameInput.value,
             balloonComment: coomentInput.value,
-            balloonContentFooter: `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`,
-            id: index.id,
+            balloonContentFooter: formatDate(date)
         }, { 
             balloonLayout: MyBalloonLayout,
             balloonContentLayout: MyBalloonContentLayout
@@ -225,7 +241,7 @@ function init() {
     }
 
     // Вывод коментариев метки
-    function markComments(mark) {
+    const markComments = (mark) => {
         if(mark){
             return `<div class="comment__box">
                 <div class="comment__title"><span><b>${mark.name}</b></span><span class="place">${mark.place}</span><span class="date">${mark.date}</span></div>
@@ -283,11 +299,10 @@ function init() {
         })
     });
 
-    function getAddress(coords) {
+    const getAddress = (coords) => {
         myGeocoder = ymaps.geocode(coords);
         
-        return myGeocoder
+        return myGeocoder;
     }
-
 }
 ymaps.ready(init);
