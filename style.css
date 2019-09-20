@@ -37,6 +37,23 @@ input, textarea {
 .popover-content {
     padding: 9px 8px;
 }
+.ballon_place {
+    color:#110bc4;
+    font-size: 12px;
+}
+.ballon_comment {
+    font-size: 12px;
+    padding-top: 2px;
+}
+.ballon_footer {     
+    text-align: right;
+    color: #7D7D7D;
+    font-size: 12px;
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    margin-bottom: 3px;
+}
 .popover-title {
     background-color: #ff8663;
     color: white;
@@ -49,6 +66,7 @@ input, textarea {
     font-size: 10px;
     font-weight: normal;
     line-height: 1.2;
+    padding-right: 4px;
 }
 .popover-title img {
     padding-right:5px;
