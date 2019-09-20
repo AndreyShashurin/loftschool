@@ -1,0 +1,147 @@
+body, html {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    font-weight: normal;
+    font-size: 12px !important;
+}
+hr {
+    margin: 10px 0;
+}
+.popover.top {
+    margin-top: -10px;
+    border: none;
+    display: block;
+}
+.popover {
+    position: absolute;
+    top: 0;
+    min-width: 350px;
+    left: 0;
+    display: none;
+    max-width: 276px;
+    padding: 1px;
+    white-space: nowrap;
+}
+.popover h3 {
+    margin:0px
+}
+input, textarea {    
+    border-radius: 10px;
+    padding: .375rem .75rem;
+    border: 1px solid #ced4da;
+}
+.popover ymaps {
+    width: auto;
+}
+.popover-content {
+    padding: 9px 8px;
+}
+.ballon_place {
+    color:#110bc4;
+    font-size: 12px;
+}
+.ballon_comment {
+    font-size: 12px;
+    padding-top: 2px;
+}
+.ballon_footer {     
+    text-align: right;
+    color: #7D7D7D;
+    font-size: 12px;
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    margin-bottom: 3px;
+}
+.popover-title {
+    background-color: #ff8663;
+    color: white;
+    display: flex;
+    line-height: 1;
+    white-space: initial;
+    align-items: center;
+}
+.popover-title h3 {
+    font-size: 10px;
+    font-weight: normal;
+    line-height: 1.2;
+    padding-right: 4px;
+}
+.popover-title img {
+    padding-right:5px;
+}
+.popover__comment {    
+    min-height: 190px;
+    max-height: 190px;
+    padding-top: 5px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.popover .close {
+    opacity: 1;
+    color: white;
+    position: absolute;
+    right: 7px;
+    top: 5px;
+}
+.btn {
+    padding: 2px 10px;
+    background: #ff8663;
+    margin-top: 0;
+    border-radius: 10px;
+    font-size: 12px;
+    border: none;
+    color: white;
+    box-shadow: none;
+    text-shadow: none;
+}
+.comment__box {
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+#button {
+    position: absolute;
+    right: 9px;
+    bottom: -5px;
+    margin-bottom: 10px;
+}
+.comment__value {
+    padding: 5px 0px 5px 0px;
+}
+.comment__title {
+    display:flex;
+    align-items: center;
+}
+.comment__title span.place, .comment__title span.date  {
+    padding: 0px 0px 0px 4px;
+    color:#8e8383
+}
+form label {
+    color: #ff8663;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 9px;
+}
+.input {
+    height:30px !important;
+}
+.input, .textarea {
+    font-size: 12px !important;
+    width:100%;
+    box-sizing: border-box;
+    border-radius:12px !important;
+}
+.textarea {
+    min-height: 100px;
+}
+.popover__comment::-webkit-scrollbar-track {
+    background-color: white;
+}
+.popover__comment::-webkit-scrollbar {
+    width: 5px;
+    background-color: white;
+}
+.popover__comment::-webkit-scrollbar-thumb {
+    background-color: #c4c4c4;
+}
