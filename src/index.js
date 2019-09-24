@@ -1,6 +1,8 @@
+import balloon from './view/baloon.hbs';
+import commentList from './view/commentList.hbs';
+
 let arrayPlacemark = [],
     arrayPlacemarksLocalStorage = [],
-    myPlacemark,
     placemarks = [],
     coords,
     myGeocoder;
@@ -36,6 +38,61 @@ const init = () => {
         ]
     });
 
+    // Макет для кластера
+    const customItemContentLayout = () => {
+        const itemContentLayout = ymaps.templateLayoutFactory.createClass(
+            `<h4 class=ballon_header>$[properties.name]</h4>
+            <div class=ballon_place data-coords="$[properties.coords]">$[properties.header]</div>
+            <div class=ballon_comment>$[properties.comment]</div>
+            <div class=ballon_footer>$[properties.date]</div>`, {
+
+            build: function () {
+                this.constructor.superclass.build.call(this);
+                let ballonPlace = document.querySelector('.ballon_place');
+                ballonPlace.addEventListener("click", this.ballonPlace);
+            },
+    
+            onCloseClick: function (e) {
+                e.preventDefault();
+                this.events.fire('userclose');
+            },            
+            
+            ballonPlace: function(event) {
+                let coords = event.target.getAttribute('data-coords'); 
+                const datMark = {
+                    coords: '',
+                    header: '',
+                    comments: []
+                }
+                for (let mark of arrayPlacemarksLocalStorage) {
+                    if(mark.coords == coords) { 
+                        datMark.coords = mark.coords;
+                        datMark.header = mark.header;
+                        datMark.comments.push(mark);
+                    }
+                }
+                openBaloon(datMark)
+            }     
+        })
+
+        return itemContentLayout;
+    }
+
+    const openBaloon = (data) => {
+        myMap.balloon.open(data.coords, data, {
+            layout: MyBalloonLayout(data),
+            contentLayout: MyBalloonContentLayout(data)
+        }); 
+    };
+
+    let clusterer = new ymaps.Clusterer({
+        clusterDisableClickZoom: true,
+        clusterOpenBalloonOnClick: true,
+        clusterBalloonContentLayout: 'cluster#balloonCarousel',
+        clusterBalloonItemContentLayout: customItemContentLayout(),
+        maxZoom: 11
+    });    
+
     // Получим данные из localStorage
     arrayPlacemarksLocalStorage = JSON.parse(localStorage.getItem('arrayPlacemarks'))
 
@@ -45,15 +102,9 @@ const init = () => {
         return lastId;
     }
 
-    const MyBalloonLayout = () => {
+    const MyBalloonLayout = (mark) => {
         const balloonLayout = ymaps.templateLayoutFactory.createClass(
-            `<div class="popover top">
-            <a class="close" href="#">&times;</a>
-            <div class="arrow"></div>
-            <div class="popover-inner">
-            $[[options.contentLayout]]
-            </div>
-            </div>`, {
+            `$[[options.contentLayout]]`, {
             build: function () {
                 this.constructor.superclass.build.call(this);
                 let propertiesClick = document.getElementById('button');
@@ -74,18 +125,15 @@ const init = () => {
             },
             applyElementOffset: function () {
                 let content = this._$element[0].querySelector('.popover__comment');
-    
+                if (mark.comments) {
+                    content.innerHTML = commentList({comments:mark.comments});
+                } else if (mark.date) {
+                    content.innerHTML = commentList({comment:mark});
+                }
                 this._$element.css({
                     left: -(this._$element[0].offsetWidth / 2),
                     top: -(this._$element[0].offsetHeight + this._$element.find('.arrow')[0].offsetHeight)
                 });  
-    
-                for (let mark of arrayPlacemarksLocalStorage) {
-                    if(mark.header == this._$element[0].querySelector('h3').innerText) {
-                        content.innerHTML += markComments(mark);
-                        this._$element[0].querySelector('.result').style.display = 'none';
-                    }
-                }
             },
             onCloseClick: function (e) {
                 e.preventDefault();
@@ -93,32 +141,27 @@ const init = () => {
             },      
             addBtn: function(event) {
                 event.preventDefault();
-                let index, content;
-                const searchForm = document.forms["comment"],
-                    lat = Number(event.target.getAttribute('data-lat')),
-                    lng = Number(event.target.getAttribute('data-lng')),
-                    header = searchForm.parentNode.parentNode.querySelector('h3').innerText;
+
+                const coords = myMap.balloon.getData(),
+                searchForm = document.forms["comment"];
+                let content = searchForm.parentNode.parentNode.querySelector('.popover__comment');
+
+                const data = {
+                    id: lastId() + 1,
+                    header: mark.header,
+                    name: searchForm.querySelector('#name-input').value,
+                    place: searchForm.querySelector('#place-input').value,
+                    comment: searchForm.querySelector('#comment-input').value,
+                    date: formatDate(date),
+                    coords: coords.coords || coords.geometry.getCoordinates()
+                };
+                createteStorage(data);
                 
-                content = searchForm.parentNode.parentNode.querySelector('.popover__comment');
-                searchForm.parentNode.parentNode.querySelector('.result').style.display = 'none';
-                content = searchForm.parentNode.parentNode.querySelector('.popover__comment'); 
-    
-                if (lat || lng) {
-                    coords = [lat, lng];
-    
-                    updateStorage(lastId(), searchForm, coords, header);        
-                    index = arrayPlacemarksLocalStorage.map(e => e.id).indexOf(lastId());  
-                    content.innerHTML += markComments(arrayPlacemarksLocalStorage[index]); 
-                } else {
-                    index = arrayPlacemarksLocalStorage.map(e => e.id).indexOf(Number(event.target.getAttribute('data-id')));      
-                    coords = [arrayPlacemarksLocalStorage[index].lat, arrayPlacemarksLocalStorage[index].lng];
-    
-                    updateStorage(index, searchForm, coords, header);
-                    content.innerHTML += markComments(arrayPlacemarksLocalStorage[index]);
-                }        
-                myPlacemark = createPlacemark(coords, header, arrayPlacemarksLocalStorage[index], searchForm);
-                clusterer.add(myPlacemark);
-                myMap.geoObjects.add(clusterer);  
+                if(data) content.innerHTML = commentList({comment:data});
+
+                placemarks = createPlacemark(data);
+                clusterer.add(placemarks);
+                myMap.geoObjects.add(clusterer);
             }
         })
          
@@ -126,180 +169,55 @@ const init = () => {
     }
 
     // Создание вложенного макета содержимого балуна.
-    const MyBalloonContentLayout = () => {
-        const balloonContentLayout = ymaps.templateLayoutFactory.createClass(
-            `<div class="popover-title">
-                <img src="/img/location.png">
-                <h3>
-                    {% if options.header %}
-                    $[options.header]
-                    {% else  %}
-                    $[properties.header]
-                    {% endif %}
-                </h3>
-            </div>
-            <div class="popover-content">
-                <div class="popover__comment">
-                    {% if properties.comment %}
-                    $[properties.comment]
-                    <hr>
-                    {% else  %}
-                    <span class="result">Отзывов пока нет...</span>
-                    {% endif %}
-                </div>
-                <form name="comment">
-                    <label>Ваш отзыв</label>
-                    <div>
-                        <input type="text" class="form-control input" id="name-input" placeholder="Ваше имя">
-                    </div>
-                    <div>
-                        <input type="text" class="form-control input" id="place-input" placeholder="Укажите место">
-                    </div>
-                    <div>
-                        <textarea class="form-control textarea" id="comment-input" placeholder="Поделитесь впечатлениями"></textarea>
-                    </div>
-                    <div>
-                        <button type="submit" id="button" class="btn pull-right"data-lat="$[options.lat]" data-lng="$[options.lng]" data-id="$[properties.id]">Добавить</button>
-                    </div>
-                </form>`
-        );
+    const MyBalloonContentLayout = (mark) => {
+        const balloonContentLayout = ymaps.templateLayoutFactory.createClass(balloon(mark));
 
         return balloonContentLayout;
     }
 
-    // Макет для кластера
-    const customItemContentLayout = () => {
-        const itemContentLayout = ymaps.templateLayoutFactory.createClass(
-            `<h4 class=ballon_header>$[properties.name]</h4>
-            <div class=ballon_place data-id="$[properties.id]">$[properties.header]</div>
-            <div class=ballon_comment>$[properties.balloonComment]</div>
-            <div class=ballon_footer>$[properties.balloonContentFooter]</div>`, {
-
-            build: function () {
-                this.constructor.superclass.build.call(this);
-                let ballonPlace = document.querySelector('.ballon_place');
-                ballonPlace.addEventListener("click", this.ballonPlace);
-                
-            },
-    
-            onCloseClick: function (e) {
-                e.preventDefault();
-                this.events.fire('userclose');
-            },            
-            
-            ballonPlace: function(event) {
-                let id = event.target.getAttribute('data-id'); 
-
-                for (let mark of arrayPlacemarksLocalStorage) {
-                    if(mark.id == id) {
-                        myMap.balloon.open([mark.lat, mark.lng], { }, {
-                            header: mark.header,
-                            id: mark.id,
-                            lat: mark.lat,
-                            lng: mark.lng,
-                            layout: MyBalloonLayout(),
-                            contentLayout: MyBalloonContentLayout()
-                        });  
-                    }
-                }
-            }     
-        })
-
-        return itemContentLayout;
-    }
-
-    const updateStorage = (option, searchForm, coords, header) => {
-        arrayPlacemarksLocalStorage.push({
-            header: header,
-            name: searchForm.querySelector('#name-input').value,
-            id: lastId() + 1,
-            lat: coords[0],
-            lng: coords[1],     
-            place: searchForm.querySelector('#place-input').value,
-            comment: searchForm.querySelector('#comment-input').value,
-            date: formatDate(date)
-        });
-
+    const createteStorage = (data) => {
+        arrayPlacemarksLocalStorage.push(data);
         localStorage.setItem('arrayPlacemarks', JSON.stringify(arrayPlacemarksLocalStorage));
     }
 
     // Создание метки.
-    const createPlacemark = (coords, header, index, searchForm) => {
-        const nameInput = searchForm.querySelector('#name-input'),
-              placeInput = searchForm.querySelector('#place-input'),
-              coomentInput = searchForm.querySelector('#comment-input');
-
-        placemarks = new ymaps.Placemark(coords, {
-            id: index.id,
-            balloonHeader: header,
-            header: header,
-            name: nameInput.value,
-            balloonComment: coomentInput.value,
-            balloonContentFooter: formatDate(date)
-        }, { 
-            balloonLayout: MyBalloonLayout(),
-            balloonContentLayout: MyBalloonContentLayout()
+    const createPlacemark = (data) => {
+        placemarks = new ymaps.Placemark(data.coords, data, { 
+            balloonLayout: MyBalloonLayout(data),
+            balloonContentLayout: MyBalloonContentLayout(data)
         });
-        nameInput.value = '';
-        placeInput.value = '';
-        coomentInput.value = '';
-
+        
         return placemarks;
     }
 
-    // Вывод коментариев метки
-    const markComments = (mark) => {
-        if(mark){
-            return `<div class="comment__box">
-                <div class="comment__title"><span><b>${mark.name}</b></span><span class="place">${mark.place}</span><span class="date">${mark.date}</span></div>
-                <div class="comment__value">${mark.comment}</div>
-                </div>`;
-        }
-    }    
-
-    let clusterer = new ymaps.Clusterer({
-        clusterDisableClickZoom: true,
-        clusterOpenBalloonOnClick: true,
-        clusterBalloonContentLayout: 'cluster#balloonCarousel',
-        clusterBalloonItemContentLayout: customItemContentLayout(),
-        maxZoom: 11
-    });    
-
     // Выведем их на карте
-    for (let mark of arrayPlacemarksLocalStorage) {
-        placemarks.push(new ymaps.Placemark([mark.lat, mark.lng], {
-            id: mark.id,
-            header: mark.header,
-            coords: [mark.lat, mark.lng],
-            name: mark.name,
-            balloonComment: mark.comment,
-            balloonContentFooter: mark.date
-        }, {
-            balloonLayout: MyBalloonLayout(),
-            balloonContentLayout: MyBalloonContentLayout(),
-            balloonCloseButton: true,
-            selectOnClick: false,
-            hideIconOnBalloonOpen: false
-        }))     
-        
-        clusterer.add(placemarks);
-        myMap.geoObjects.add(clusterer);     
-    }
-
+    const initMark = () => {
+        for (let mark of arrayPlacemarksLocalStorage) {
+            placemarks.push(new ymaps.Placemark(mark.coords, mark, {
+                balloonLayout: MyBalloonLayout(mark),
+                balloonContentLayout: MyBalloonContentLayout(mark),
+                balloonCloseButton: true,
+                selectOnClick: false,
+                hideIconOnBalloonOpen: false
+            }))     
+            clusterer.add(placemarks);
+            myMap.geoObjects.add(clusterer);
+        }
+    }   
+ 
     // Слушаем клик на карте.
     myMap.events.add('click', function (e) {
         coords = e.get('coords'); 
-        
         getAddress(coords).then(result => { 
-            myMap.balloon.open(coords, { }, {
-                coords: coords,
+            let data = {
+                coords: [coords[0], coords[1]],
                 header: result.geoObjects.get(0).getAddressLine(),
-                id: lastId(),
-                lat: coords[0],
-                lng: coords[1],
-                layout: MyBalloonLayout(),
-                contentLayout: MyBalloonContentLayout()
-            });       
+                id: lastId() + 1
+            };
+            myMap.balloon.open(coords, data, {
+                layout: MyBalloonLayout(data),
+                contentLayout: MyBalloonContentLayout(data)
+            });      
         })
     });
 
@@ -308,5 +226,8 @@ const init = () => {
         
         return myGeocoder;
     }
+    
+    initMark()
 }
+
 ymaps.ready(init);

@@ -1,0 +1,30 @@
+<div class="popover top">
+    <a class="close" href="#">×</a>
+    <div class="arrow"></div>
+    <div class="popover-inner">
+        <div class="popover-title">
+            <img src="/img/location.png">
+            <h3>{{header}}</h3>
+        </div>
+        <div class="popover-content">
+            <div class="popover__comment">
+                {{> "./commentList.hbs"}}
+            </div>
+            <form name="comment">
+                <label>Ваш отзыв</label>
+                <div>
+                    <input type="text" class="form-control input" id="name-input" placeholder="Ваше имя">
+                </div>
+                <div>
+                    <input type="text" class="form-control input" id="place-input" placeholder="Укажите место">
+                </div>
+                <div>
+                    <textarea class="form-control textarea" id="comment-input" placeholder="Поделитесь впечатлениями"></textarea>
+                </div>
+                <div>
+                    <button type="submit" id="button" class="btn pull-right" data-id="{{id}}">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

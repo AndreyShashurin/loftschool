@@ -1,0 +1,10 @@
+{{#with comment}}
+    {{> "./popover.hbs"}}
+{{else}}
+    {{#each comments}}
+        {{> "./popover.hbs"}}
+    {{else}}
+        Отзывов пока нет...
+    {{/each}}
+{{/with}}
+<hr>
