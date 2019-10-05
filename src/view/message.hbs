@@ -1,0 +1,31 @@
+{{#if messages}}
+    {{#each messages}}
+    <div class="message__container">
+        <div class="message__img">
+        {{#if messages.img}}
+        <img src="{{messages.img}}" alt="ava">
+        {{else}}
+        <img src="https://taniec.info/images/layout1/no_picture_60x60.gif" alt="ava">
+        {{/if}}
+        </div>
+        <div class="message__context">
+            <div class="message__name">{{messages.fio}}</div>
+            <div class="message__text">{{messages.text}}</div>
+        </div>
+    </div>
+    {{/each}}
+{{else}}
+    <div class="message__container">
+        <div class="message__img">
+        {{#if message.img}}
+        <img src="{{message.img}}" alt="ava">
+        {{else}}
+        <img src="https://taniec.info/images/layout1/no_picture_60x60.gif" alt="ava">
+        {{/if}}
+        </div>
+        <div class="message__context">
+            <div class="message__name">{{message.fio}}</div>
+            <div class="message__text">{{message.text}}</div>
+        </div>
+    </div>
+{{/if}}

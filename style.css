@@ -1,0 +1,149 @@
+html, body {
+    font-size: 0.9rem !important;
+}
+main, nav, html, body, .container-fluid, .row  {
+    height: 100%;
+}
+nav {
+    background: #ff8b62;
+}
+.usernblock {
+    align-items: center;
+    cursor: pointer;
+    padding: 5%;
+    height: auto;
+}
+.userInfo {
+    flex: 1;
+    padding-left: 5px;
+}
+.usernblock .name {
+    text-align: center; 
+    line-height: initial;
+    padding: 0px 2px 0px 2px;
+    color: white;
+    font-weight: bold;
+}
+.usernblock button {
+    line-height: initial;
+    padding: 0.2rem;
+    margin: 0 auto;
+    margin-top: 4px;
+    display: block;
+    background: white;
+    font-size: inherit;
+}
+.login-form {
+    position: absolute;
+    width: 50%;
+    left: 25%;
+    right: 25%;
+    z-index: 100;
+    background: #f2f1f2;
+    padding: 2%;
+}
+.messageForm {
+    height: auto;
+}
+.messageForm div {
+    position: absolute;
+    bottom: 0
+}
+.messageForm input {
+    height: calc(1em + 0.6rem + 2px);
+}
+.messageForm button {
+    padding: .175rem .75rem;
+    font-size: inherit
+}
+.messageForm div:last-child {
+    right: 0;
+}
+.messsage {
+    overflow: auto;
+    height: 90%;
+}
+.message__container {
+    display: flex;
+    align-items: center;
+    font-size: 0.8rem;
+    margin: 2px 0px 10px 0px;
+}
+.message__container img {   
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+.message__name {
+    padding-bottom: 3px;
+    font-weight: bold;
+}
+.message__context {
+    padding-left: 1rem;
+}
+.btn-accept {
+    background: #ff8b62;
+    color: white;
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+}
+.dragzone .label{
+    width: 188px;
+    margin: 0 auto;
+}
+.dragzone #filedrag{
+    max-height: 150px;
+    min-height: 150px;
+    border: 2px dotted grey;
+    text-align: center;
+    border-radius: 5px;
+    display: block;
+    padding: 1.2em;
+    transition: border 300ms ease;
+    cursor: pointer;
+}
+.dragzone img{
+    width:100%;
+    opacity: 0;
+}
+.dragzone img[src]{
+    opacity: 1;
+}
+.dragzone input {
+    display: none;
+}
+.dragzone .label:hover {
+    box-shadow: 0pt 3px 4px #dbdbdb inset;
+ }
+ .useractive {
+    overflow: auto;
+    height: 69%;
+ } 
+ .useractive label {
+     color: white;
+     font-weight: bold
+ } 
+ .useractive .user {
+    display:flex;
+    align-items: center;
+    margin: 4px 0px 4px 0px;
+} 
+ .useractive .user__name {
+     padding-left: 5%
+ } 
+.useractive img {
+    width: 25px;
+    border-radius: 50%;
+    height: 25px;
+}
