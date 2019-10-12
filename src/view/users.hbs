@@ -1,14 +1,14 @@
 <div class="users">
     <!--<label >Участники <span class="count"></span></label>-->
     {{#each users}}
-    <div class="user">
+    <div class="user" data-name="{{fio}}">
         {{#if img}}
         <img src="{{img}}" alt="ava" class="user__img">
         {{else}}
         <img src="https://taniec.info/images/layout1/no_picture_60x60.gif" alt="ava" class="user__img">
         {{/if}}
         <div class="user__name">{{fio}}</div>
-        <div class="user__age">{{nik}}</div>
+        <div class="user__nik">{{nik}}</div>
     </div>
     {{/each}}
 </div>

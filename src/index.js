@@ -3,7 +3,7 @@ import messageNbs from './view/message.hbs';
 import userInfoHBS from './view/userInfo.hbs';
 import { rejects } from 'assert';
 
-const ws = new WebSocket('ws://localhost:9000');
+const ws = new WebSocket('ws://localhost:9001');
 const storageName = 'user';
 
 // User form
@@ -40,7 +40,8 @@ function update(value){
 
 const handlers = {
     getUsers: function (data) {
-      document.querySelector('.useractive').innerHTML = usersNbs({ users: data });
+      console.log('getUsers', data)
+      document.querySelector('.useractive').innerHTML = usersNbs({ users: data.users });
     },
     newUser(data) {
         document.querySelector('.useractive').innerHTML += usersNbs({ users: data });
@@ -61,22 +62,49 @@ const handlers = {
         document.location.reload(true);
     },
     logOutUser(data) {
+      console.log(data)
         const details = data.allUsers.filter((e) => { return e.id !== data.user.id })
         document.querySelector('.useractive').innerHTML = usersNbs({ users: details })
     },
-    errorUser() {
+    errorUser(data) {
+      console.log(data)
       confirm('Пользователь с таким именем уже есть');
     },
-    accessAllowed(data) {       
+    accessAllowed(data) {   
         sessionStorage.setItem(storageName, '{}');
         update({fio: data.fio})
         update({nik: data.nik})
 
         loginFormFn();
         storageFunc();  
+    },
+    uploadPhoto(data) {
+      console.log("uploadPhoto",data)          
+      const attribute = document.querySelectorAll(`[data-name=${data.fio}]`);
+
+      for (let name of attribute) {
+        name.querySelector('img').src = data.img;
+      }
+    },
+    setSettings(data) {
+      console.log("setSettings", data)    
+      const users = document.querySelectorAll(`[data-name="${data.fio}"]`);
+      
+      for (const user of users) {
+          user.querySelector('img').src = `http://localhost:9000${data.img}`;
+      }     
+    },
+    upload: function (data) {
+        console.log('upload', data)
+        const users = document.querySelectorAll(`[data-name="${data.fio}"]`);
+
+        for (const user of users) {
+            user.querySelector('img').src = `http://localhost:9000${data.img}`;
+        }
     }
 }
 
+let unbind = true;
 const storageFunc = () => {
   const storage = JSON.parse(sessionStorage.getItem(storageName));
   userForm.innerHTML = userInfoHBS({name: storage ? storage.fio :''});
@@ -103,13 +131,16 @@ const storageFunc = () => {
 
     const logout = userForm.querySelector('.logout');
     logout.addEventListener('click', () => {
+      unbind = false;
+      storageFunc();
       const logOut = {
         fio: storage.fio,
         nik: storage.nik
       }
       sendSocket('logOut', logOut);
+     return
     })
-  
+    
     sendButton.onclick = () => {
       sendMessage();
     }
@@ -180,11 +211,27 @@ const storageFunc = () => {
       fileupload.addEventListener('click', (e) => { 
           update({img: reader.result})
           userImg.src = reader.result;
+          const storageValue = {
+            fio: fio.value,
+            nik: nik.value,
+            img: reader.result
+          }
+
+          sendSocket('uploadPhoto', storageValue);
+         /* ws.send(JSON.stringify({
+            payload: 'upload',
+            data: {
+                name: file.name,
+                arrayBuffer: Array.from(new Uint8Array(file.name))
+            }
+        }))*/
       })
     }
+
   }
   
   return;
+
 }
 
 
@@ -208,3 +255,14 @@ const sendSocket = (payload, data) => {
     data: data
   }))   
 }
+/*
+
+if (unbind)  {
+  window.onbeforeunload = function() {
+    const logOut = {
+      fio: JSON.parse(sessionStorage.getItem(storageName)).fio,
+      nik: JSON.parse(sessionStorage.getItem(storageName)).nik,
+    }
+    sendSocket('logOut', logOut);
+  };
+}*/

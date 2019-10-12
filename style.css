@@ -140,7 +140,8 @@ nav {
     margin: 4px 0px 4px 0px;
 } 
  .useractive .user__name {
-     padding-left: 5%
+    padding-left: 2%;
+    padding-right: 2%;
  } 
 .useractive img {
     width: 25px;

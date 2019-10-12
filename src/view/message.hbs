@@ -1,6 +1,6 @@
 {{#if messages}}
     {{#each messages}}
-    <div class="message__container">
+    <div class="message__container" data-name="{{messages.fio}}">
         <div class="message__img">
         {{#if messages.img}}
         <img src="{{messages.img}}" alt="ava">
@@ -15,7 +15,7 @@
     </div>
     {{/each}}
 {{else}}
-    <div class="message__container">
+    <div class="message__container" data-name="{{message.fio}}">
         <div class="message__img">
         {{#if message.img}}
         <img src="{{message.img}}" alt="ava">

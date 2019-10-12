@@ -1,8 +1,16 @@
 const WebSocket = require('ws');
 const uuidv1 = require('uuid/v1');
+const fs = require('fs');
+const http = require('http');
+var url = require('url');
+const server = http.createServer((req, res) => {
+    //сделать проверку
+    res.end(fs.readFileSync(`.${req.url}`));
+});
 
-const wss = new WebSocket.Server({ port: 9000 });
+const wss = new WebSocket.Server({ port: 9001, noServer: true});
 const users = {};
+const usersHistory = [];
 const allMessage = [];
 const handlers = {
     newUser: function (data, ws) {
@@ -31,12 +39,31 @@ const handlers = {
                     }))
                 }
             }
+            
 
+            if (usersHistory.length) {
+                for (let user of usersHistory) {
+                    if (user.fio !== data.fio) {
+                        console.log('Не Нашли', user)
+                        /*ws.send(JSON.stringify({
+                            payload: 'setSettings',
+                            data: data
+                        }))*/
+                    } else {
+                        delete user;
+                        console.log('Нашли', user)
+                    }
+                }
+            } else {
+                usersHistory.push(ws.userData);
+            }
             ws.send(JSON.stringify({
                 payload: 'getUsers',
-                data: allUsers
+                data: {
+                    users: allUsers,
+                    usersHistory: usersHistory
+                }
             }));
-
 
             ws.send(JSON.stringify({
                 payload: 'accessAllowed',
@@ -85,7 +112,46 @@ const handlers = {
             payload: 'getOutUser',
             data: data
         }));
-    }
+    },
+    uploadPhoto: function (data, ws) {
+        ws.userData = data;
+
+      /*  for (const id in users) {
+            if (users.hasOwnProperty(id)) {
+                users[id].send(JSON.stringify({
+                    payload: 'updatePhoto',
+                    data: ws.userData
+                }))
+            }
+        }*/
+        for (const id in usersHistory) {
+            if (usersHistory[id].fio == data.fio) {
+                usersHistory[id].img = data.img
+            }
+            ws.send(JSON.stringify({
+                payload: 'setSettings',
+                data: usersHistory
+            }))
+        }
+    },
+   /* upload: function (data, ws) {
+        if (!fs.existsSync('./upload')) {
+            fs.mkdirSync('./upload');
+        }
+
+        fs.appendFileSync(`./upload/${data.name}`, Buffer.from(data.arrayBuffer))
+
+        ws.userData.img = `/upload/${data.name}`;
+
+        for (const id in users) {
+            if (users.hasOwnProperty(id)) {
+                users[id].send(JSON.stringify({
+                    payload: 'upload',
+                    data: ws.userData
+                }))
+            }
+        }
+    }*/
 }
 wss.on('connection', function (ws) {
     ws.on('message', function (event) {
@@ -96,3 +162,6 @@ wss.on('connection', function (ws) {
         console.log('Отключено')
     })
 });
+
+
+server.listen(9000);
